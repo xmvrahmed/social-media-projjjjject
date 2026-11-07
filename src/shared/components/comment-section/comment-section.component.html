@@ -1,0 +1,185 @@
+<section class="mt-4 rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+  <h3 class="mb-4 text-sm sm:text-base font-bold text-slate-900">
+    Comments ({{ comments().length }})
+  </h3>
+
+  <div class="mb-5 flex items-start gap-3">
+    <img [src]="authService.currentUser()?.photo || 'route.png'"
+         [alt]="authService.currentUser()?.name || 'User'"
+         class="h-9 w-9 shrink-0 rounded-full object-cover border border-slate-200"
+         (error)="$any($event.target).src = 'route.png'" />
+    <div class="w-full">
+      <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-2 transition focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100">
+        <input type="text" [ngModel]="newCommentText()" (ngModelChange)="newCommentText.set($event)" (keyup.enter)="submitComment()"
+               placeholder="Write a comment..."
+               class="w-full bg-transparent text-xs sm:text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+        
+        <label class="cursor-pointer p-1 text-slate-400 hover:text-slate-600 transition" title="Attach image">
+          <svg class="h-5 w-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+          <input type="file" accept="image/*" (change)="onFileSelected($event)" class="hidden" />
+        </label>
+
+        <button type="button" (click)="submitComment()"
+                [disabled]="isSubmitting() || (!newCommentText().trim() && !selectedFile())"
+                class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-40">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (previewUrl()) {
+        <div class="relative mt-2 inline-block rounded-xl overflow-hidden border border-slate-200">
+          <img [src]="previewUrl()" alt="Attachment preview" class="h-20 w-20 object-cover" />
+          <button type="button" (click)="removeFile()"
+                  class="absolute top-1 right-1 rounded-full bg-slate-900/80 p-1 text-white hover:bg-slate-900 transition">
+            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      }
+      @if (actionError()) {
+        <p class="mt-2 text-xs font-semibold text-rose-600" role="alert">{{ actionError() }}</p>
+      }
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="py-6 text-center">
+      <p class="text-sm font-semibold text-rose-600" role="alert">{{ errorMessage() }}</p>
+      <button type="button" (click)="loadComments()" class="mt-2 text-xs font-bold text-blue-600 hover:underline">Try again</button>
+    </div>
+  } @else if (isLoading()) {
+    <div class="py-6 text-center text-xs text-slate-400">
+      <svg class="mx-auto h-6 w-6 animate-spin text-blue-600" viewBox="0 0 24 24" fill="none">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  } @else if (comments().length === 0) {
+    <p class="py-6 text-center text-xs font-medium text-slate-400">
+      No comments yet. Share your thoughts first!
+    </p>
+  } @else {
+    <div class="space-y-4">
+      @for (comment of comments(); track comment._id) {
+        <div class="flex items-start gap-3 group">
+          <a [routerLink]="['/profile', comment.commentCreator._id]" class="shrink-0">
+            <img [src]="comment.commentCreator.photo || 'route.png'"
+                 [alt]="comment.commentCreator.name"
+                 class="h-8 w-8 rounded-full object-cover border border-slate-200"
+                 (error)="$any($event.target).src = 'route.png'" />
+          </a>
+
+          <div class="flex-1 min-w-0">
+            <div class="inline-block rounded-2xl bg-slate-100/80 px-3.5 py-2.5 max-w-full">
+              <div class="flex items-center justify-between gap-3">
+                <a [routerLink]="['/profile', comment.commentCreator._id]"
+                   class="truncate text-xs font-bold text-slate-900 hover:text-blue-600">
+                  {{ comment.commentCreator.name }}
+                </a>
+                <span class="text-[11px] text-slate-400 shrink-0">{{ comment.createdAt | timeAgo }}</span>
+              </div>
+
+              @if (editingCommentId() === comment._id) {
+                <div class="mt-2 space-y-2">
+                  <input type="text" [ngModel]="editContent()" (ngModelChange)="editContent.set($event)" (keyup.enter)="saveEditComment(comment)"
+                         class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-800 outline-none focus:border-blue-500" />
+                  <div class="flex justify-end gap-1.5">
+                    <button type="button" (click)="cancelEdit()" class="text-[11px] font-semibold text-slate-500 hover:underline">Cancel</button>
+                    <button type="button" (click)="saveEditComment(comment)" class="text-[11px] font-bold text-blue-600 hover:underline">Save</button>
+                  </div>
+                </div>
+              } @else {
+                @if (comment.content) {
+                  <p class="mt-1 text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">
+                    {{ comment.content }}
+                  </p>
+                }
+              }
+
+              @if (comment.image) {
+                <div class="mt-2 rounded-lg overflow-hidden max-h-48">
+                  <img [src]="comment.image" alt="Comment media" class="max-h-48 rounded-lg object-cover" />
+                </div>
+              }
+            </div>
+
+            <div class="mt-1 flex items-center gap-3 px-2 text-[11px] font-semibold text-slate-500">
+              <button type="button" (click)="likeComment(comment)"
+                      class="hover:underline"
+                      [ngClass]="comment.isLiked ? 'text-blue-600 font-bold' : ''">
+                Like @if (comment.likesCount) { ({{ comment.likesCount }}) }
+              </button>
+
+              <button type="button" (click)="openReplyInput(comment._id)" class="hover:underline">
+                Reply
+              </button>
+
+              <button type="button" (click)="toggleReplies(comment._id)" class="hover:underline text-blue-600">
+                Replies
+              </button>
+
+              @if (isCommentOwner(comment)) {
+                <button type="button" (click)="startEditComment(comment)" class="text-slate-400 hover:text-slate-700">
+                  Edit
+                </button>
+                <button type="button" (click)="deleteComment(comment._id)" class="text-rose-500 hover:text-rose-700">
+                  Delete
+                </button>
+              }
+            </div>
+
+            @if (activeReplyCommentId() === comment._id) {
+              <div class="mt-2 flex items-center gap-2 pl-4">
+                <input type="text" [ngModel]="replyText()" (ngModelChange)="replyText.set($event)" (keyup.enter)="sendReply(comment._id)"
+                       placeholder="Write a reply..."
+                       class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500 focus:bg-white" />
+                <button type="button" (click)="sendReply(comment._id)"
+                        class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700">
+                  Reply
+                </button>
+              </div>
+            }
+
+            @if (repliesMap()[comment._id]) {
+              <div class="mt-2.5 pl-4 space-y-2 border-l-2 border-slate-200">
+                @for (reply of repliesMap()[comment._id]; track reply._id) {
+                  <div class="flex items-start gap-2">
+                    <img [src]="reply.commentCreator.photo || 'route.png'"
+                         [alt]="reply.commentCreator.name"
+                         class="h-6 w-6 rounded-full object-cover border border-slate-200"
+                         (error)="$any($event.target).src = 'route.png'" />
+                    <div class="rounded-xl bg-slate-50 px-3 py-1.5 text-xs">
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-slate-900">{{ reply.commentCreator.name }}</span>
+                        <span class="text-[10px] text-slate-400">{{ reply.createdAt | timeAgo }}</span>
+                      </div>
+                      <p class="text-slate-700 mt-0.5">{{ reply.content }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!isLoading() && hasMore()) {
+    <div class="mt-5 text-center">
+      <button type="button" (click)="loadMore()" [disabled]="isLoadingMore()"
+              class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+        {{ isLoadingMore() ? 'Loading…' : 'Load more comments' }}
+      </button>
+    </div>
+  }
+</section>

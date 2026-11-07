@@ -1,0 +1,31 @@
+﻿<div class="login-panel">
+  <h2>Log in to Route Posts</h2>
+  <p>Log in and continue your social journey.</p>
+
+  @if (errorMessage()) {
+    <p class="form-error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <form [formGroup]="loginForm" (ngSubmit)="loginSubmit()" class="auth-form" autocomplete="on">
+    <label class="field">
+      <span class="field-icon"><i class="fa-solid fa-user"></i></span>
+      <input type="text" name="username" formControlName="credential" placeholder="Email or username" autocomplete="username" />
+    </label>
+    @if (loginForm.controls.credential.touched && loginForm.controls.credential.invalid) {
+      <span class="field-error">Enter your email or username.</span>
+    }
+
+    <label class="field">
+      <span class="field-icon"><i class="fa-solid fa-lock"></i></span>
+      <input type="password" name="password" formControlName="password" placeholder="Password" autocomplete="current-password" />
+    </label>
+    @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+      <span class="field-error">Password is required.</span>
+    }
+
+    <button type="submit" class="primary-btn" [disabled]="isLoading()">
+      {{ isLoading() ? 'Logging in...' : 'Log In' }}
+    </button>
+    <a class="forgot-link" routerLink="/auth/forget">Forgot password?</a>
+  </form>
+</div>

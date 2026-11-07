@@ -1,0 +1,12 @@
+<section class="post-detail">
+  <a routerLink="/feed" class="back-link">← Back to feed</a>
+
+  @if (isLoading()) {
+    <p class="status">Loading post…</p>
+  } @else if (errorMessage()) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  } @else if (post(); as currentPost) {
+    <app-post-card [post]="currentPost" [isDetailView]="true"></app-post-card>
+    <app-comment-section [postId]="currentPost._id"></app-comment-section>
+  }
+</section>

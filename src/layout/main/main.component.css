@@ -1,0 +1,15 @@
+﻿:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f4f7fa 0%, #edf3f8 100%);
+}
+
+.main-shell {
+  min-height: 100vh;
+}
+
+.content-shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 18px 16px 36px;
+}

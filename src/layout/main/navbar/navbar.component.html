@@ -1,0 +1,38 @@
+﻿<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-wrap">
+      <img src="/route.png" alt="" class="brand-logo" />
+      <span class="brand-name">Route Posts</span>
+    </div>
+
+    <nav class="nav-pills" aria-label="Main navigation">
+      <a routerLink="/feed" routerLinkActive="active"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Feed</span></a>
+      <a routerLink="/profile" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><i class="fa-regular fa-user" aria-hidden="true"></i><span>Profile</span></a>
+      <a routerLink="/notifications" routerLinkActive="active">
+        <i class="fa-regular fa-comment" aria-hidden="true"></i>
+        <span>Notifications</span>
+        @if (notificationService.unreadCount() > 0) {
+          <em class="nav-badge">{{ notificationService.unreadCount() }}</em>
+        }
+      </a>
+    </nav>
+
+    <div class="user-actions">
+      <button type="button" class="avatar-pill" (click)="toggleMenu()"
+              [attr.aria-expanded]="isMenuOpen()" aria-label="Open account menu">
+        <img [src]="authService.currentUser()?.photo || 'route.png'"
+             [alt]="authService.currentUser()?.name || 'Your profile'"
+             (error)="$any($event.target).src = 'route.png'" />
+        <span>{{ authService.currentUser()?.name || 'Account' }}</span>
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
+      @if (isMenuOpen()) {
+        <div class="account-menu">
+          <a routerLink="/profile" (click)="closeMenu()">Profile</a>
+          <a routerLink="/change-password" (click)="closeMenu()">Change password</a>
+          <button type="button" (click)="logout()">Log out</button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

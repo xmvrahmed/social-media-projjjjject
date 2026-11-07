@@ -1,0 +1,145 @@
+﻿:host {
+  display: block;
+}
+
+.card {
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(148,163,184,0.5);
+  border-radius: 22px;
+  padding: 24px 20px;
+}
+
+.notifications-shell {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.notifications-shell h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(2rem, 2.4vw, 2.6rem);
+  letter-spacing: -0.05em;
+}
+
+.notifications-header p {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.notifications-header p.inline-error,
+.inline-error {
+  color: #b91c1c;
+  font-size: 0.82rem;
+}
+
+.mark-all,
+.status button {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mark-all:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 14px;
+  border: 1px solid rgba(148,163,184,0.45);
+  border-radius: 14px;
+  background: rgba(241,245,249,0.8);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.notification-item.unread {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  object-fit: cover;
+  background: white;
+}
+
+.notification-copy {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  color: #334155;
+}
+
+.notification-copy strong {
+  color: #0f172a;
+}
+
+.notification-copy time {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.unread-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+.status {
+  padding: 28px 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+.status.error {
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.status.error p {
+  margin: 0 0 12px;
+}
+
+@media (max-width: 520px) {
+  .notifications-header {
+    align-items: flex-start;
+  }
+
+  .mark-all {
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,50 @@
+<section class="notifications-shell card">
+  <header class="notifications-header">
+    <div>
+      <h2>Notifications</h2>
+      <p>{{ unreadCount() }} unread</p>
+      @if (countError()) {
+        <p class="inline-error" role="alert">{{ countError() }}</p>
+      }
+    </div>
+    <button type="button" class="mark-all" (click)="markAllAsRead()" [disabled]="!unreadCount() || isUpdating()">
+      Mark all as read
+    </button>
+  </header>
+
+  @if (actionError()) {
+    <p class="inline-error" role="alert">{{ actionError() }}</p>
+  }
+
+  @if (errorMessage()) {
+    <div class="status error" role="alert">
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="loadNotifications()">Try again</button>
+    </div>
+  } @else if (isLoading()) {
+    <p class="status">Loading notifications…</p>
+  } @else if (!notifications().length) {
+    <p class="status">You’re all caught up. No notifications yet.</p>
+  } @else {
+    <div class="notification-list">
+      @for (notification of notifications(); track notification._id) {
+        <button type="button" class="notification-item"
+                [class.unread]="!notification.isRead && !notification.read"
+                (click)="markAsRead(notification)">
+          <img [src]="notification.actor?.photo || notification.user?.photo || 'route.png'"
+               [alt]="notification.actor?.name || notification.user?.name || 'Route Posts'"
+               class="avatar"
+               (error)="$any($event.target).src = 'route.png'" />
+          <span class="notification-copy">
+            <strong>{{ notification.actor?.name || notification.user?.name || 'Route Posts' }}</strong>
+            <span>{{ notification.message || notification.content || notification.type || 'New activity' }}</span>
+            <time>{{ notification.createdAt | date:'medium' }}</time>
+          </span>
+          @if (!notification.isRead && !notification.read) {
+            <span class="unread-dot" aria-label="Unread"></span>
+          }
+        </button>
+      }
+    </div>
+  }
+</section>

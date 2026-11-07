@@ -1,0 +1,68 @@
+<div class="register-panel">
+  <h2>Create a new account</h2>
+  <p>It is quick and easy.</p>
+
+  @if (errorMessage()) {
+    <p class="form-error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <form [formGroup]="registerform" (ngSubmit)="registerformsubmit()" class="register-form">
+    <label class="field">
+      <span class="field-icon"><i class="fa-solid fa-user"></i></span>
+      <input type="text" formControlName="name" placeholder="Full name" autocomplete="name" />
+    </label>
+    @if (registerform.get('name')?.touched && registerform.get('name')?.invalid) {
+      <span class="field-error">Enter your name (at least 3 characters).</span>
+    }
+
+    <label class="field">
+      <span class="field-icon"><i class="fa-solid fa-at"></i></span>
+      <input type="text" formControlName="username" placeholder="Username (optional)" autocomplete="username" />
+    </label>
+
+    <label class="field">
+      <span class="field-icon"><i class="fa-solid fa-envelope"></i></span>
+      <input type="email" formControlName="email" placeholder="Email address" autocomplete="email" />
+    </label>
+    @if (registerform.get('email')?.touched && registerform.get('email')?.invalid) {
+      <span class="field-error">Enter a valid email address.</span>
+    }
+
+    <label class="field">
+      <span class="field-icon"><i class="fa-solid fa-venus-mars"></i></span>
+      <select formControlName="gender">
+        <option value="">Select gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field-icon"><i class="fa-solid fa-calendar"></i></span>
+      <input type="date" formControlName="dateOfBirth" aria-label="Date of birth" />
+    </label>
+
+    <label class="field password-field">
+      <span class="field-icon"><i class="fa-solid fa-lock"></i></span>
+      <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="Password" autocomplete="new-password" />
+      <button type="button" class="show-password" (click)="toggleShowPassword()" aria-label="Toggle password visibility">
+        <i class="fa-solid" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()"></i>
+      </button>
+    </label>
+
+    <label class="field password-field">
+      <span class="field-icon"><i class="fa-solid fa-lock"></i></span>
+      <input [type]="showRePassword() ? 'text' : 'password'" formControlName="rePassword" placeholder="Confirm password" autocomplete="new-password" />
+      <button type="button" class="show-password" (click)="toggleShowRePassword()" aria-label="Toggle confirm password visibility">
+        <i class="fa-solid" [class.fa-eye]="!showRePassword()" [class.fa-eye-slash]="showRePassword()"></i>
+      </button>
+    </label>
+    @if (registerform.hasError('mismatch') && registerform.get('rePassword')?.touched) {
+      <span class="field-error">Passwords do not match.</span>
+    }
+
+    <button type="submit" class="primary-btn" [disabled]="isLoading()">
+      {{ isLoading() ? 'Creating account...' : 'Create New Account' }}
+    </button>
+  </form>
+</div>

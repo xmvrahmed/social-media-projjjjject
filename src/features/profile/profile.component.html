@@ -1,0 +1,151 @@
+@if (user(); as profile) {
+  <section class="profile-shell">
+    @if (errorMessage()) {
+      <p class="profile-error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <div class="cover">
+      @if (profile.cover) {
+        <img [src]="profile.cover" alt="" />
+      }
+      @if (isOwnProfile) {
+        <button type="button" class="cover-action">
+          <i class="fa-solid fa-camera" aria-hidden="true"></i>
+          Add cover
+        </button>
+      }
+    </div>
+
+    <div class="profile-body">
+      <div class="profile-top">
+        <div class="identity">
+          <div class="avatar-wrap">
+            <img class="avatar large" [src]="profile.photo || 'route.png'" [alt]="profile.name"
+                 (error)="$any($event.target).src = 'route.png'" />
+            @if (isOwnProfile) {
+              <label class="photo-action" aria-label="Update profile photo" title="Update profile photo">
+                <i class="fa-solid fa-camera" aria-hidden="true"></i>
+                <input type="file" accept="image/*" (change)="onPhotoSelected($event)" [disabled]="isUploadingPhoto()" />
+              </label>
+            }
+          </div>
+          <div class="profile-meta">
+            <h1>{{ profile.name }}</h1>
+            @if (profile.username) {
+              <p>&#64;{{ profile.username }}</p>
+            }
+            <span class="member-badge">
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
+              Route Posts member
+            </span>
+          </div>
+          @if (!isOwnProfile) {
+            <button type="button" class="follow-button" (click)="toggleFollow()">
+              {{ isFollowing() ? 'Unfollow' : 'Follow' }}
+            </button>
+          }
+        </div>
+
+        <div class="stats-row" aria-label="Profile statistics">
+          <div class="stat-card">
+            <span>Followers</span>
+            <strong>{{ profile.followersCount ?? 0 }}</strong>
+          </div>
+          <div class="stat-card">
+            <span>Following</span>
+            <strong>{{ profile.followingCount ?? 0 }}</strong>
+          </div>
+          <div class="stat-card">
+            <span>{{ isOwnProfile ? 'Bookmarks' : 'Posts' }}</span>
+            <strong>{{ isOwnProfile ? bookmarks().length : (profile.postsCount ?? posts().length) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-grid">
+        <section class="about-card" aria-labelledby="about-title">
+          <div class="about-heading">
+            <h2 id="about-title">About</h2>
+            @if (isOwnProfile) {
+              <a routerLink="/change-password">Change password</a>
+            }
+          </div>
+          <p>
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+            <span>{{ profile.email }}</span>
+          </p>
+          <p>
+            <i class="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Active on Route Posts</span>
+          </p>
+          @if (isUploadingPhoto()) {
+            <p class="upload-status" role="status">Updating profile photo…</p>
+          }
+        </section>
+
+        <div class="activity-cards">
+          <div class="activity-card">
+            <span>{{ isOwnProfile ? 'My posts' : 'Posts' }}</span>
+            <strong>{{ profile.postsCount ?? posts().length }}</strong>
+          </div>
+          @if (isOwnProfile) {
+            <div class="activity-card">
+              <span>Saved posts</span>
+              <strong>{{ bookmarks().length }}</strong>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="profile-content">
+    <div class="profile-tabs" role="tablist" aria-label="Profile posts">
+      <button type="button" [class.active]="activeTab() === 'posts'" (click)="setTab('posts')">Posts</button>
+      @if (isOwnProfile) {
+        <button type="button" [class.active]="activeTab() === 'saved'" (click)="setTab('saved')">Saved</button>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <p class="profile-status">Loading profile…</p>
+    } @else if (activeTab() === 'posts') {
+      @if (posts().length) {
+        <div class="profile-posts">
+          @for (post of posts(); track post._id) {
+            <app-post-card [post]="post"
+                           (postDeleted)="onPostDeleted($event)"
+                           (postUpdated)="onPostUpdated($event)"></app-post-card>
+          }
+        </div>
+      } @else {
+        <p class="profile-status">No posts yet.</p>
+      }
+    } @else if (isLoadingBookmarks()) {
+      <p class="profile-status" role="status">Loading saved posts…</p>
+    } @else if (bookmarks().length) {
+      <div class="mb-3.5 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+        <div class="min-w-0">
+          <h2 class="text-base font-extrabold text-slate-800">Saved bookmarks</h2>
+          <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">Posts you have saved for later.</p>
+        </div>
+        <span class="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+          {{ bookmarks().length }} {{ bookmarks().length === 1 ? 'post' : 'posts' }}
+        </span>
+      </div>
+      <div class="profile-posts">
+        @for (post of bookmarks(); track post._id) {
+          <app-post-card [post]="post"
+                         (postDeleted)="onPostDeleted($event)"
+                         (postUpdated)="onPostUpdated($event)"></app-post-card>
+        }
+      </div>
+    } @else {
+      <p class="profile-status">No saved posts yet.</p>
+    }
+  </section>
+} @else if (isLoading()) {
+  <p class="profile-status">Loading profile…</p>
+} @else {
+  <p class="profile-status" role="alert">{{ errorMessage() || 'Profile not found.' }}</p>
+}
